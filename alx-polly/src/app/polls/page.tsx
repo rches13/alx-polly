@@ -2,27 +2,41 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+import { deletePoll } from "@/lib/actions/polls";
 
-export default function PollsPage() {
-  // Placeholder data - will be replaced with real data from Supabase
-  const placeholderPolls = [
-    {
-      id: "1",
-      question: "What's your favorite programming language?",
-      options: ["JavaScript", "Python", "TypeScript", "Rust"],
-      totalVotes: 42,
-      createdAt: "2024-01-15",
-      isActive: true,
-    },
-    {
-      id: "2",
-      question: "Which framework do you prefer for web development?",
-      options: ["Next.js", "React", "Vue", "Angular"],
-      totalVotes: 28,
-      createdAt: "2024-01-14",
-      isActive: true,
-    },
-  ];
+interface PageProps {
+  searchParams?: Promise<{ created?: string; error?: string }>;
+}
+
+export const runtime = 'nodejs';
+
+export default async function PollsPage(props: PageProps) {
+  const sp = (props.searchParams ? await props.searchParams : {}) || {} as any;
+  const created = sp.created === '1';
+  const deleted = sp.deleted === '1';
+  const error = sp.error as string | undefined;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data: polls } = await supabase
+    .from('polls')
+    .select('id, question, is_active, created_at, creator_id')
+    .order('created_at', { ascending: false });
+
+  const pollIds = (polls || []).map(p => p.id);
+  const { data: results } = pollIds.length ? await supabase
+    .from('poll_results')
+    .select('poll_id, votes_count')
+    .in('poll_id', pollIds) : { data: [] as any[] } as any;
+
+  const votesByPoll = new Map<string, number>();
+  (results || []).forEach(r => {
+    const pid = r.poll_id as string;
+    const prev = votesByPoll.get(pid) || 0;
+    votesByPoll.set(pid, prev + Number(r.votes_count));
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -36,36 +50,47 @@ export default function PollsPage() {
         </Button>
       </div>
 
+      {(created || deleted || error) && (
+        <div className={`mb-6 p-3 text-sm border rounded-md ${error ? 'text-red-700 bg-red-50 border-red-200' : 'text-green-700 bg-green-50 border-green-200'}`}>
+          {error ? (error || 'Something went wrong.') : (created ? 'Poll created successfully.' : 'Poll deleted successfully.')}
+        </div>
+      )}
+
       <div className="grid gap-6">
-        {placeholderPolls.map((poll) => (
+        {(polls || []).map((poll) => (
           <Card key={poll.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-xl">{poll.question}</CardTitle>
                   <CardDescription className="mt-2">
-                    {poll.options.length} options • {poll.totalVotes} total votes
+                    {votesByPoll.get(poll.id) || 0} total votes
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Badge variant={poll.isActive ? "default" : "secondary"}>
-                    {poll.isActive ? "Active" : "Closed"}
+                  <Badge variant={poll.is_active ? "default" : "secondary"}>
+                    {poll.is_active ? "Active" : "Closed"}
                   </Badge>
                   <Badge variant="outline">
-                    {poll.createdAt}
+                    {new Date(poll.created_at).toLocaleDateString()}
                   </Badge>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 mb-4">
-                {poll.options.map((option, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-primary"></div>
-                    <span className="text-sm">{option}</span>
-                  </div>
-                ))}
-              </div>
+              {user?.id === poll.creator_id && (
+                <div className="flex gap-2 mb-4">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/polls/${poll.id}/edit`}>Edit</Link>
+                  </Button>
+                  <form action={deletePoll}>
+                    <input type="hidden" name="poll_id" value={poll.id} />
+                    <Button type="submit" variant="destructive" size="sm">
+                      Delete
+                    </Button>
+                  </form>
+                </div>
+              )}
               <Button asChild variant="outline" className="w-full">
                 <Link href={`/polls/${poll.id}`}>View & Vote</Link>
               </Button>

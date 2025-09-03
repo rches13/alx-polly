@@ -1,0 +1,10 @@
+[project]
+ref = "your-project-ref"
+
+[api]
+# Supabase Studio API; default is fine
+studio_url = "https://api.supabase.com"
+
+[db]
+# Local dev DB connection (optional for remote-only workflows)
+shadow_enabled = false

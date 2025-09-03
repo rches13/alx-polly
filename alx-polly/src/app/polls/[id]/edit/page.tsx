@@ -4,52 +4,63 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
-import { createPoll } from "@/lib/actions/polls";
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
+import { updatePoll } from "@/lib/actions/polls";
 
 interface PageProps {
-  searchParams: Promise<{ error?: string }>;
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ error?: string }>;
 }
 
 export const runtime = 'nodejs';
 
-export default async function CreatePollPage(props: PageProps) {
+export default async function EditPollPage(props: PageProps) {
+  const { id } = await props.params;
+  const { error: errorParam } = (props.searchParams ? await props.searchParams : {}) || {} as any;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    redirect('/auth/login');
-  }
-  const { error } = await props.searchParams;
-  return <CreatePollForm serverError={error} />;
-}
+  if (!user) redirect('/auth/login');
 
-function CreatePollForm({ serverError }: { serverError?: string }) {
+  const { data: poll, error: pollError } = await supabase
+    .from('polls')
+    .select('id, question, description, creator_id')
+    .eq('id', id)
+    .single();
+  if (pollError || !poll) notFound();
+  if (poll.creator_id !== user.id) redirect('/polls');
+
+  const { data: options, error: optionsError } = await supabase
+    .from('poll_options')
+    .select('id, text, position')
+    .eq('poll_id', id)
+    .order('position', { ascending: true });
+  if (optionsError) notFound();
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Create New Poll</CardTitle>
+          <CardTitle className="text-2xl">Edit Poll</CardTitle>
           <CardDescription>
-            Design a poll with your question and multiple choice options
+            Update your question and options
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-6" action={createPoll}>
-            {serverError && (
+          <form className="space-y-6" action={updatePoll}>
+            {errorParam && (
               <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {serverError === "invalid" && "Please provide a question and at least two options."}
-                {serverError === "create_failed" && "Could not create poll. Please try again."}
-                {serverError === "options_failed" && "Could not save options. Please try again."}
-                {!["invalid","create_failed","options_failed"].includes(serverError) && serverError}
+                {errorParam}
               </div>
             )}
+            <input type="hidden" name="poll_id" value={poll.id} />
             <div className="space-y-2">
               <Label htmlFor="question">Poll Question</Label>
               <Textarea
                 id="question"
                 name="question"
-                placeholder="What would you like to ask?"
+                defaultValue={poll.question}
                 className="min-h-[100px]"
                 required
               />
@@ -58,33 +69,18 @@ function CreatePollForm({ serverError }: { serverError?: string }) {
             <div className="space-y-4">
               <Label>Poll Options</Label>
               <div className="space-y-3">
-                {[1, 2, 3, 4].map((index) => (
-                  <div key={index} className="flex gap-2">
+                {(options || []).map((opt, index) => (
+                  <div key={opt.id} className="flex gap-2">
                     <Input
                       name="options"
-                      placeholder={`Option ${index}`}
-                      required={index <= 2}
+                      defaultValue={opt.text}
+                      required={index <= 1}
                     />
-                    {index > 2 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="px-2"
-                      >
-                        ×
-                      </Button>
-                    )}
                   </div>
                 ))}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2"
-              >
-                + Add Option
+              <Button type="button" variant="outline" size="sm" className="mt-2" disabled>
+                + Add Option (coming soon)
               </Button>
             </div>
 
@@ -93,14 +89,14 @@ function CreatePollForm({ serverError }: { serverError?: string }) {
               <Textarea
                 id="description"
                 name="description"
-                placeholder="Add context or additional information about your poll"
+                defaultValue={poll.description ?? ''}
                 className="min-h-[80px]"
               />
             </div>
 
             <div className="flex gap-4">
               <Button type="submit" className="flex-1">
-                Create Poll
+                Save Changes
               </Button>
               <Button type="button" variant="outline" asChild>
                 <Link href="/polls">Cancel</Link>
@@ -109,12 +105,8 @@ function CreatePollForm({ serverError }: { serverError?: string }) {
           </form>
         </CardContent>
       </Card>
-
-      <div className="mt-6 text-center">
-        <Link href="/" className="text-muted-foreground hover:underline">
-          ← Back to home
-        </Link>
-      </div>
     </div>
   );
 }
+
+
