@@ -43,7 +43,7 @@ export default async function PollsPage(props: PageProps) {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Browse Polls</h1>
-          <p className="text-muted-foreground">Discover and participate in polls</p>
+          <p className="text-xl text-muted-foreground">Discover and participate in polls</p>
         </div>
         <Button asChild>
           <Link href="/polls/create">Create New Poll</Link>
@@ -56,34 +56,32 @@ export default async function PollsPage(props: PageProps) {
         </div>
       )}
 
-      <div className="grid gap-6">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {(polls || []).map((poll) => (
           <Card key={poll.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle className="text-xl">{poll.question}</CardTitle>
-                  <CardDescription className="mt-2">
-                    {votesByPoll.get(poll.id) || 0} total votes
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  <Badge variant={poll.is_active ? "default" : "secondary"}>
-                    {poll.is_active ? "Active" : "Closed"}
+              <CardTitle className="text-base font-semibold mb-1 truncate" title={poll.question}>
+                {poll.question}
+              </CardTitle>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{votesByPoll.get(poll.id) || 0} votes</span>
+                <span className="flex gap-1 items-center">
+                  <Badge variant={poll.is_active ? 'default' : 'secondary'} className="px-2 py-0.5 text-xs">
+                    {poll.is_active ? 'Active' : 'Closed'}
                   </Badge>
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="px-2 py-0.5 text-xs">
                     {new Date(poll.created_at).toLocaleDateString()}
                   </Badge>
-                </div>
+                </span>
               </div>
             </CardHeader>
             <CardContent>
               {user?.id === poll.creator_id && (
-                <div className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-2">
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/polls/${poll.id}/edit`}>Edit</Link>
                   </Button>
-                  <form action={deletePoll}>
+                  <form action={deletePoll} className="inline">
                     <input type="hidden" name="poll_id" value={poll.id} />
                     <Button type="submit" variant="destructive" size="sm">
                       Delete
@@ -91,7 +89,7 @@ export default async function PollsPage(props: PageProps) {
                   </form>
                 </div>
               )}
-              <Button asChild variant="outline" className="w-full">
+              <Button asChild variant="outline" size="sm" className="w-full mt-2">
                 <Link href={`/polls/${poll.id}`}>View & Vote</Link>
               </Button>
             </CardContent>

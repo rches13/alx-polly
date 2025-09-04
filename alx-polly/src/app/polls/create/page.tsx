@@ -29,8 +29,8 @@ function CreatePollForm({ serverError }: { serverError?: string }) {
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Create New Poll</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold">Create New Poll</CardTitle>
+          <CardDescription className="text-xl">
             Design a poll with your question and multiple choice options
           </CardDescription>
         </CardHeader>

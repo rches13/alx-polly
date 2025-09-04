@@ -62,8 +62,8 @@ export default function RegisterPage() {
     <div className="container mx-auto px-4 py-8 max-w-md">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create Account</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold">Create Account</CardTitle>
+          <CardDescription className="text-xl">
             Join ALX Polly to create and manage polls
           </CardDescription>
         </CardHeader>

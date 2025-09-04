@@ -66,9 +66,9 @@ export default async function PollPage({ params }: PollPageProps) {
         <CardHeader>
           <div className="flex justify-between items-start mb-4">
             <div>
-              <CardTitle className="text-2xl">{poll.question}</CardTitle>
+              <CardTitle className="text-3xl font-bold">{poll.question}</CardTitle>
               {poll.description && (
-                <CardDescription className="mt-2 text-base">
+                <CardDescription className="mt-2 text-xl">
                   {poll.description}
                 </CardDescription>
               )}
@@ -82,12 +82,10 @@ export default async function PollPage({ params }: PollPageProps) {
               </Badge>
             </div>
           </div>
-          
           <div className="text-sm text-muted-foreground">
             Created on {new Date(poll.created_at).toLocaleDateString()}
           </div>
         </CardHeader>
-        
         <CardContent>
           <div className="space-y-4 mb-6">
             {enrichedOptions.map((option) => (
@@ -107,7 +105,6 @@ export default async function PollPage({ params }: PollPageProps) {
               </div>
             ))}
           </div>
-
           {poll.is_active && (
             <div className="space-y-3">
               <div className="text-center text-sm text-muted-foreground">
@@ -136,7 +133,6 @@ export default async function PollPage({ params }: PollPageProps) {
               )}
             </div>
           )}
-
           <div className="mt-6 pt-6 border-t">
             <div className="text-center space-y-3">
               <div className="text-sm text-muted-foreground">
@@ -154,7 +150,6 @@ export default async function PollPage({ params }: PollPageProps) {
           </div>
         </CardContent>
       </Card>
-
       <div className="mt-6 flex gap-4 justify-center">
         <Button variant="outline" asChild>
           <Link href="/polls">← Browse Polls</Link>

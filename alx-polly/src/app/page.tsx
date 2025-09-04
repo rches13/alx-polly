@@ -29,33 +29,19 @@ export default function Home() {
         <p className="text-xl text-muted-foreground mb-8">
           Create and share polls with QR codes
         </p>
-        
         {user ? (
           <div className="space-y-4">
             <div className="text-lg text-muted-foreground">
               Welcome back, {user.user_metadata?.name || user.email}!
             </div>
-            <div className="flex gap-4 justify-center">
-              <Button asChild>
-                <Link href="/polls/create">Create New Poll</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/polls">My Polls</Link>
-              </Button>
-              <Button variant="outline" onClick={signOut}>
-                Sign Out
-              </Button>
-            </div>
+            <Button asChild>
+              <Link href="/polls/create">Create New Poll</Link>
+            </Button>
           </div>
         ) : (
-          <div className="flex gap-4 justify-center">
-            <Button asChild>
-              <Link href="/auth/login">Login</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/auth/register">Register</Link>
-            </Button>
-          </div>
+          <Button asChild>
+            <Link href="/auth/login">Login</Link>
+          </Button>
         )}
       </header>
 
@@ -91,23 +77,21 @@ export default function Home() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Share & Vote</CardTitle>
+            <CardTitle>About & Help</CardTitle>
             <CardDescription>
-              Share polls via links and QR codes
+              Learn how to use ALX Polly and share polls
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button variant="outline" asChild className="w-full">
-              <Link href="/polls/example">View Example</Link>
+              <Link href="/about">Learn More</Link>
             </Button>
           </CardContent>
         </Card>
       </div>
 
       {/* Footer */}
-      <footer className="text-center text-muted-foreground">
-        <p>Built with Next.js, Supabase, and AI assistance</p>
-      </footer>
+      {/* Footer removed as requested */}
     </div>
   );
 }

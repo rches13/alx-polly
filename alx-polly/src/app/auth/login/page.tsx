@@ -43,8 +43,8 @@ export default function LoginPage() {
     <div className="container mx-auto px-4 py-8 max-w-md">
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Login to ALX Polly</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold">Login to ALX Polly</CardTitle>
+          <CardDescription className="text-xl">
             Access your polls and create new ones
           </CardDescription>
         </CardHeader>
@@ -84,16 +84,15 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          
-          <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">Don&apos;t have an account? </span>
-            <Link href="/auth/register" className="text-primary hover:underline">
-              Register here
-            </Link>
-          </div>
-          
-          <div className="mt-4 text-center">
-            <Link href="/" className="text-sm text-muted-foreground hover:underline">
+
+          <div className="mt-6 flex flex-col items-center gap-2 text-sm">
+            <span className="text-muted-foreground">
+              Don&apos;t have an account?{' '}
+              <Link href="/auth/register" className="text-primary hover:underline">
+                Register here
+              </Link>
+            </span>
+            <Link href="/" className="text-muted-foreground hover:underline">
               ← Back to home
             </Link>
           </div>

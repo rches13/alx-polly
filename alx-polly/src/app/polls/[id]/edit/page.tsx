@@ -42,8 +42,8 @@ export default async function EditPollPage(props: PageProps) {
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Edit Poll</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-3xl font-bold">Edit Poll</CardTitle>
+          <CardDescription className="text-xl">
             Update your question and options
           </CardDescription>
         </CardHeader>
