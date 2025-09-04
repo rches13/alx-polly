@@ -58,6 +58,8 @@ export default async function PollPage({ params }: PollPageProps) {
     return { id: o.id, text: o.text, votes, percentage };
   });
 
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
@@ -117,15 +119,21 @@ export default async function PollPage({ params }: PollPageProps) {
                     key={option.id}
                     variant="outline"
                     className="justify-start h-auto py-3 px-4"
+                    disabled={!user}
                   >
                     <div className="w-4 h-4 border-2 border-primary rounded-full mr-3"></div>
                     {option.text}
                   </Button>
                 ))}
               </div>
-              <Button className="w-full" disabled>
+              <Button className="w-full" disabled={!user}>
                 Submit Vote
               </Button>
+              {!user && (
+                <div className="text-center text-sm text-red-600 mt-2">
+                  You must <Link href="/auth/login" className="underline">log in</Link> to vote.
+                </div>
+              )}
             </div>
           )}
 
