@@ -42,8 +42,16 @@ export default async function PollPage({ params }: PollPageProps) {
     .select('option_id, votes_count')
     .eq('poll_id', id);
 
-  const optionIdToVotes = new Map<string, number>((results || []).map(r => [r.option_id as string, Number(r.votes_count)]));
-  const totalVotes = Array.from(optionIdToVotes.values()).reduce((a, b) => a + b, 0);
+  // Optimize: Build a map and tally total votes in one pass
+  let totalVotes = 0;
+  const optionIdToVotes = new Map<string, number>();
+  (results || []).forEach(r => {
+    const votes = Number(r.votes_count);
+    optionIdToVotes.set(r.option_id as string, votes);
+    totalVotes += votes;
+  });
+
+  // Optimize: Calculate enriched options in a single map pass
   const enrichedOptions = (options || []).map(o => {
     const votes = optionIdToVotes.get(o.id) || 0;
     const percentage = totalVotes > 0 ? Math.round((votes / totalVotes) * 1000) / 10 : 0;
