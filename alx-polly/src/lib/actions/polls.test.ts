@@ -32,3 +32,4 @@ describe('createPoll (integration)', () => {
     expect(redirect).toHaveBeenCalledWith('/polls?created=1');
   });
 });
+
